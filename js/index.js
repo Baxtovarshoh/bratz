@@ -10,6 +10,7 @@ const footEle = document.querySelector(".foot");
 const imgEle = document.querySelectorAll(".im");
 const blocks = document.querySelectorAll(".container-block > div");
 const video = document.querySelector("video");
+const volume = document.querySelector(".volume");
 
 const characters = [
   "cloe",
@@ -59,6 +60,7 @@ let timer = 20;
 let timerInterval;
 let lastHitPart = new Set();
 let windowHeight = window.innerHeight < 400;
+let currentVolume = false;
 
 [...srcVideo.horizontal, ...srcVideo.vertical].forEach((e) => {
   let link = document.createElement("link");
@@ -69,6 +71,18 @@ let windowHeight = window.innerHeight < 400;
 });
 function updateScore() {
   scoreEle.forEach((el) => (el.textContent = score));
+}
+function updateVolume() {
+  volume.innerHTML = "";
+  if (!currentVolume) {
+    currentVolume = true;
+    video.muted = false;
+    volume.innerHTML += `<i class="bi bi-volume-up-fill"></i>`;
+  } else {
+    volume.innerHTML += `<i class="bi bi-volume-mute-fill"></i>`;
+    currentVolume = false;
+    video.muted = true;
+  }
 }
 
 function updateLogo() {
