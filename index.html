@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bratz</title>
+    <link rel="stylesheet" href="css/index.css" />
+    <script src="js/index.js" defer></script>
+    <link rel="stylesheet" href="css/responsive.css" />
+  </head>
+  <body>
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="screen">
+        <div class="video hidden">
+          <video muted></video>
+        </div>
+        <div class="start-card">
+          <div class="glow">
+            <div class="logo">
+              <img src="assets/image/logo.png" alt="" />
+            </div>
+            <div class="hed-text">
+              <p>Swipe the images to match the Bratz</p>
+            </div>
+            <div class="button">
+              <button onclick="startGame()">play now</button>
+            </div>
+            <div class="img-tablo">
+              <img src="assets/image/all-bratz.png" alt="" />
+            </div>
+          </div>
+        </div>
+        <div class="game hidden">
+          <div class="logos-container">
+            <img class="sasha" src="assets/image/sasha-logo.png" alt="" />
+            <img class="yasmina" src="assets/image/yasmin-logo.png" alt="" />
+            <img class="cloe" src="assets/image/cloe-logo.png" alt="" />
+          </div>
+          <div class="tera">
+            <p>Time: <span class="time">0</span>s</p>
+            <p>Score: <span class="score">0</span></p>
+          </div>
+          <div class="container-block">
+            <div class="head">
+              <img
+                class="im"
+                data-el="head"
+                src="assets/image/yasmina-head.png"
+                alt=""
+              />
+              <img
+                class="im"
+                data-el="head"
+                src="assets/image/sasha-head.png"
+                alt=""
+              />
+              <img
+                class="im"
+                data-el="head"
+                src="assets/image/cloe-head.png"
+                alt=""
+              />
+            </div>
+            <div class="body">
+              <img
+                class="im"
+                data-el="body"
+                src="assets/image/cloe-body.png"
+                alt=""
+              />
+              <img
+                class="im"
+                data-el="body"
+                src="assets/image/yasmina-body.png"
+                alt=""
+              />
+              <img
+                class="im"
+                data-el="body"
+                src="assets/image/sasha-body.png"
+                alt=""
+              />
+            </div>
+            <div class="foot">
+              <img
+                class="im"
+                data-el="foot"
+                src="assets/image/sasha-foot.png"
+                alt=""
+              />
+              <img
+                class="im"
+                data-el="foot"
+                src="assets/image/cloe-foot.png"
+                alt=""
+              />
+              <img
+                class="im"
+                data-el="foot"
+                src="assets/image/yasmina-foot.png"
+                alt=""
+              />
+            </div>
+          </div>
+        </div>
+        <div class="end-card hidden">
+          <div class="glow">
+            <div class="logo">
+              <img src="assets/image/logo.png" alt="" />
+            </div>
+            <div class="hed-text1">
+              <p class="te">Great Job !</p>
+              <p class="e">Score: <span class="score">3</span></p>
+            </div>
+            <div class="buttons">
+              <button onclick="playAgain()">play again</button>
+              <button>learn more</button>
+            </div>
+            <div class="img-tablo">
+              <img src="assets/image/all-bratz.png" alt="" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="swipe"></div>
+    </div>
+  </body>
+</html>
