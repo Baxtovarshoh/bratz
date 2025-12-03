@@ -26,16 +26,58 @@ const srcVideo = {
   vertical: ["vertical-v1", "vertical-v2"],
   horizontal: ["horizontal-v1", "horizontal-v2"],
 };
+const linkFor = [
+  "all-bratz",
+  "back",
+  "cloe-body",
+  "cloe-foot",
+  "cloe-head",
+  "cloe-logo",
+  "yasmina-body",
+  "yasmina-foot",
+  "yasmina-head",
+  "yasmina-logo",
+  "sasha-body",
+  "sasha-foot",
+  "sasha-head",
+  "sasha-logo",
+  "logo",
+];
+
+linkFor.forEach((e) => {
+  let link = document.createElement("link");
+  link.as = "image/png";
+  link.rel = "preload";
+  link.type = "png";
+  link.href = `assets/image/${e}.png`;
+  document.head.appendChild(link);
+});
 
 let current = "";
 let score = 0;
-let hitCount = 0;
 let timer = 20;
 let timerInterval;
 let lastHitPart = new Set();
+let windowHeight = window.innerHeight < 400;
 
+[...srcVideo.horizontal, ...srcVideo.vertical].forEach((e) => {
+  let link = document.createElement("link");
+  link.as = "video";
+  link.rel = "preload";
+  link.href = `assets/video/${e}.mp4`;
+  document.head.appendChild(link);
+});
 function updateScore() {
   scoreEle.forEach((el) => (el.textContent = score));
+}
+
+function updateLogo() {
+  logosContainer.forEach((logo) => {
+    logo.classList.remove("active");
+    if (logo.classList.contains(current)) {
+      logo.classList.add("active");
+    }
+  });
 }
 
 function randomState() {
@@ -76,7 +118,6 @@ function randomizeBlockScrolls() {
 
 function applyState() {
   current = randomState();
-  hitCount = 0;
   lastHitPart.clear();
   console.log("🎯 Новый персонаж:", current);
 
@@ -86,7 +127,7 @@ function applyState() {
     block.innerHTML = "";
     items.forEach((img) => block.appendChild(img));
   });
-
+  updateLogo(current);
   randomizeBlockScrolls();
 }
 
@@ -153,12 +194,6 @@ function startGame() {
       clearInterval(timerInterval);
     }
   }, 1000);
-
-  logosContainer.forEach((e) => {
-    if (e.classList.contains(`${current}`)) {
-      e.classList.add("active");
-    }
-  });
 }
 function playAgain() {
   score = 0;
@@ -168,32 +203,39 @@ function playAgain() {
   endEle.classList.add("hidden");
   timer = 20;
   timeEle.textContent = timer;
-  logosContainer.forEach((e) => {
-    if (e.classList.contains(`${current}`)) {
-      e.classList.add("active");
+  updateLogo(current);
+  timerInterval = setInterval(() => {
+    if (timer > 0) {
+      timer--;
+      timeEle.textContent = timer;
+    } else {
+      finishGame();
+      clearInterval(timerInterval);
     }
-  });
+  }, 1000);
 
   applyState();
 }
 
-// function randomVideo() {
-//   if (windowHeight) {
-//     video.src = `assets/video/${
-//       srcVideo.horizontal[Math.floor(Math.random() * 2)]
-//     }.mp4`;
-//   } else {
-//     video.src = `assets/video/${
-//       srcVideo.vertical[Math.floor(Math.random() * 2)]
-//     }.mp4`;
-//     console.log(Math.floor(Math.random() * 2));
-//   }
-//   video.load();
-//   video.play();
-// }
-// function endedVideo() {
-//   videoEle.classList.add("hidden");
-//   startEle.classList.remove("hidden");
-// }
-// document.addEventListener("DOMContentLoaded", randomVideo);
-// video.addEventListener("ended", endedVideo);
+function randomVideo() {
+  if (windowHeight) {
+    video.src = `assets/video/${
+      srcVideo.horizontal[Math.floor(Math.random() * 2)]
+    }.mp4`;
+  } else {
+    video.src = `assets/video/${
+      srcVideo.vertical[Math.floor(Math.random() * 2)]
+    }.mp4`;
+    console.log(Math.floor(Math.random() * 2));
+  }
+  video.load();
+  video.play();
+}
+function endedVideo() {
+  videoEle.classList.add("hidden");
+  startEle.classList.remove("hidden");
+}
+document.addEventListener("DOMContentLoaded", randomVideo);
+video.addEventListener("ended", endedVideo);
+
+randomVideo();

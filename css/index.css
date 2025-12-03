@@ -169,16 +169,14 @@ body {
 .foot {
   width: 100%;
   height: 33.3333333333333%;
-  display: flex;
   background: #ff0048;
   border-bottom: 2px solid white;
-  overflow-x: auto;
-  display: flex;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   touch-action: pan-x;
   scrollbar-width: none;
+  display: flex;
 }
 .buttons {
   width: 100%;
