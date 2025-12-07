@@ -81,8 +81,8 @@ body {
   justify-content: center;
 }
 .button > button {
-  width: 50%;
-  height: 40px;
+  width: 54%;
+  height: 50px;
   border-radius: 0;
   border: 2px solid;
   border-image: linear-gradient(150deg, #ff0048, #9500ff) 1;
@@ -188,8 +188,8 @@ body {
 
 .buttons > button,
 a {
-  width: 50%;
-  height: 40px;
+  width: 55%;
+  height: 50px;
   border-radius: 0;
   border: 2px solid;
   border-image: linear-gradient(150deg, #ff0048, #9500ff) 1;

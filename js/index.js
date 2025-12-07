@@ -12,17 +12,8 @@ const blocks = document.querySelectorAll(".container-block > div");
 const video = document.querySelector("video");
 const volume = document.querySelector(".volume");
 
-const characters = [
-  "cloe",
-  "yasmina",
-  "sasha",
-  "cloe",
-  "yasmina",
-  "sasha",
-  "cloe",
-  "yasmina",
-  "sasha",
-];
+const characterOrder = ["cloe", "yasmina", "sasha"];
+
 const srcVideo = {
   vertical: ["vertical-v1", "vertical-v2"],
   horizontal: ["horizontal-v1", "horizontal-v2"],
@@ -44,7 +35,13 @@ const linkFor = [
   "sasha-logo",
   "logo",
 ];
-
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
 linkFor.forEach((e) => {
   let link = document.createElement("link");
   link.as = "image/png";
@@ -53,14 +50,17 @@ linkFor.forEach((e) => {
   link.href = `assets/image/${e}.png`;
   document.head.appendChild(link);
 });
+let newShuffleArr = shuffle(characterOrder);
+let currentIndex = 0;
 
-let current = "";
+let current = newShuffleArr[currentIndex];
 let score = 0;
-let timer = 20;
+let timer = 30;
 let timerInterval;
-let lastHitPart = new Set();
-let windowHeight = window.innerHeight < 400;
+let windowHeight = window.innerHeight <= 400;
 let currentVolume = false;
+let solvedParts = { head: false, body: false, foot: false };
+let readyToCheck = false;
 
 [...srcVideo.horizontal, ...srcVideo.vertical].forEach((e) => {
   let link = document.createElement("link");
@@ -72,6 +72,7 @@ let currentVolume = false;
 function updateScore() {
   scoreEle.forEach((el) => (el.textContent = score));
 }
+
 function updateVolume() {
   volume.innerHTML = "";
   if (!currentVolume) {
@@ -94,61 +95,57 @@ function updateLogo() {
   });
 }
 
-function randomState() {
-  return characters[Math.floor(Math.random() * characters.length)];
+function nextCharacter() {
+  currentIndex = (currentIndex + 1) % characterOrder.length;
+  current = characterOrder[currentIndex];
+  solvedParts = { head: false, body: false, foot: false };
+  updateLogo();
+  randomizeBlockScrolls();
+  console.log("nextCharacter");
 }
 
 function randomizeBlockScrolls() {
+  console.log("randomsizeBlockScrolls");
+
+  readyToCheck = false;
   blocks.forEach((block) => {
-    const blockWidth = block.clientWidth;
     const items = [...block.querySelectorAll("img")];
-    const target = items.find((img) => img.src.includes(current));
 
-    if (target) {
-      const targetPos = target.offsetLeft;
-      const maxScroll = block.scrollWidth - blockWidth;
-      let scrollPos;
+    items.sort(() => Math.random() - 5.3);
+    block.innerHTML = "";
+    items.forEach((img) => block.appendChild(img));
 
-      if (targetPos < blockWidth / 2) {
-        scrollPos = targetPos + blockWidth;
-      } else if (targetPos > maxScroll - blockWidth / 2) {
-        scrollPos = targetPos - blockWidth;
-      } else {
-        scrollPos =
-          Math.random() < 0.5
-            ? targetPos - blockWidth / 2
-            : targetPos + blockWidth / 2;
-      }
-
-      scrollPos = Math.max(0, Math.min(maxScroll, scrollPos));
-      block.scrollLeft = scrollPos;
-    } else {
-      block.scrollLeft = Math.floor(
-        Math.random() * (block.scrollWidth - blockWidth)
-      );
-    }
+    const blockWidth = block.clientWidth;
+    const maxScroll = block.scrollWidth - blockWidth - 150;
+    block.scrollLeft = Math.floor(Math.random() * maxScroll);
   });
+  setTimeout(() => {
+    readyToCheck = true;
+    console.log("reski");
+  }, 500);
 }
 
 function applyState() {
-  current = randomState();
-  lastHitPart.clear();
-  console.log("🎯 Новый персонаж:", current);
-
   blocks.forEach((block) => {
     const items = [...block.querySelectorAll("img")];
-    items.sort(() => Math.random() - 0.5);
+    items.sort(() => Math.random() - 0.2);
     block.innerHTML = "";
     items.forEach((img) => block.appendChild(img));
+    console.log("reski2");
   });
   updateLogo(current);
   randomizeBlockScrolls();
+  console.log("applyState()");
 }
 
 blocks.forEach((block) => {
   let timeout;
+
   block.addEventListener("scroll", () => {
+    if (!readyToCheck) return;
     clearTimeout(timeout);
+    console.log("face");
+
     timeout = setTimeout(() => {
       const imgs = [...block.querySelectorAll("img")];
       const blockRect = block.getBoundingClientRect();
@@ -165,34 +162,55 @@ blocks.forEach((block) => {
         if (dist < minDist) {
           minDist = dist;
           closest = img;
+          console.log("dist");
         }
       });
 
       if (!closest) return;
 
-      // closest.scrollIntoView({ behavior: "smooth", inline: "center" });
-      closest.classList.add("actives");
-      const char = characters.find((c) => closest.src.includes(c));
-      if (char === current && !lastHitPart.has(closest)) {
-        lastHitPart.add(closest);
+      const rect = closest.getBoundingClientRect();
+      const imgCenter = rect.left + rect.width / 2;
+      const offset = imgCenter - centerX + block.scrollLeft;
+
+      block.scrollTo({
+        left: offset,
+        behavior: "smooth",
+      });
+
+      const part = closest.dataset.el;
+      const isCorrect = closest.src.includes(current);
+
+      solvedParts[part] = isCorrect;
+
+      console.log(isCorrect);
+      
+      if (solvedParts.head && solvedParts.body && solvedParts.foot) {
         score++;
         updateScore();
-        if (score >= blocks.length) {
-          setTimeout(() => {
-            finishGame();
-          }, 2000);
-        }
+        solvedParts = { head: false, body: false, foot: false };
+        nextCharacter();
+        console.log("solved");
+
+        randomizeBlockScrolls();
       }
-    }, 150);
+      if (score === 3) {
+        setTimeout(() => {
+          finishGame();
+        }, 100);
+      }
+    }, 500);
   });
 });
 
 function finishGame() {
   gameEle.classList.add("hidden");
   endEle.classList.remove("hidden");
+  clearInterval(timerInterval);
 }
 
 function startGame() {
+  console.log("startGame");
+  solvedParts = { head: false, body: false, foot: false };
   timeEle.textContent = timer;
   score = 0;
   updateScore();
@@ -209,26 +227,18 @@ function startGame() {
     }
   }, 1000);
 }
+
 function playAgain() {
+  console.log("playAgain");
   score = 0;
   updateScore();
   startEle.classList.add("hidden");
   gameEle.classList.remove("hidden");
   endEle.classList.add("hidden");
-  timer = 20;
+  timer = 30;
   timeEle.textContent = timer;
   updateLogo(current);
-  timerInterval = setInterval(() => {
-    if (timer > 0) {
-      timer--;
-      timeEle.textContent = timer;
-    } else {
-      finishGame();
-      clearInterval(timerInterval);
-    }
-  }, 1000);
-
-  applyState();
+  startGame();
 }
 
 function randomVideo() {
