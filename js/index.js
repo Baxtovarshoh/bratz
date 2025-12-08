@@ -183,7 +183,7 @@ blocks.forEach((block) => {
       solvedParts[part] = isCorrect;
 
       console.log(isCorrect);
-      
+
       if (solvedParts.head && solvedParts.body && solvedParts.foot) {
         score++;
         updateScore();
@@ -261,5 +261,6 @@ function endedVideo() {
 }
 document.addEventListener("DOMContentLoaded", randomVideo);
 video.addEventListener("ended", endedVideo);
+document.addEventListener("resize", randomVideo);
 
 randomVideo();
