@@ -52,7 +52,6 @@ linkFor.forEach((e) => {
 });
 let newShuffleArr = shuffle(characterOrder);
 let currentIndex = 0;
-
 let current = newShuffleArr[currentIndex];
 let score = 0;
 let timer = 30;
@@ -101,11 +100,9 @@ function nextCharacter() {
   solvedParts = { head: false, body: false, foot: false };
   updateLogo();
   randomizeBlockScrolls();
-  console.log("nextCharacter");
 }
 
 function randomizeBlockScrolls() {
-  console.log("randomsizeBlockScrolls");
 
   readyToCheck = false;
   blocks.forEach((block) => {
@@ -121,7 +118,6 @@ function randomizeBlockScrolls() {
   });
   setTimeout(() => {
     readyToCheck = true;
-    console.log("reski");
   }, 500);
 }
 
@@ -131,11 +127,9 @@ function applyState() {
     items.sort(() => Math.random() - 0.2);
     block.innerHTML = "";
     items.forEach((img) => block.appendChild(img));
-    console.log("reski2");
   });
   updateLogo(current);
   randomizeBlockScrolls();
-  console.log("applyState()");
 }
 
 blocks.forEach((block) => {
@@ -144,7 +138,6 @@ blocks.forEach((block) => {
   block.addEventListener("scroll", () => {
     if (!readyToCheck) return;
     clearTimeout(timeout);
-    console.log("face");
 
     timeout = setTimeout(() => {
       const imgs = [...block.querySelectorAll("img")];
@@ -162,7 +155,6 @@ blocks.forEach((block) => {
         if (dist < minDist) {
           minDist = dist;
           closest = img;
-          console.log("dist");
         }
       });
 
@@ -182,15 +174,12 @@ blocks.forEach((block) => {
 
       solvedParts[part] = isCorrect;
 
-      console.log(isCorrect);
 
       if (solvedParts.head && solvedParts.body && solvedParts.foot) {
         score++;
         updateScore();
         solvedParts = { head: false, body: false, foot: false };
         nextCharacter();
-        console.log("solved");
-
         randomizeBlockScrolls();
       }
       if (score === 3) {
@@ -209,7 +198,6 @@ function finishGame() {
 }
 
 function startGame() {
-  console.log("startGame");
   solvedParts = { head: false, body: false, foot: false };
   timeEle.textContent = timer;
   score = 0;
@@ -229,7 +217,6 @@ function startGame() {
 }
 
 function playAgain() {
-  console.log("playAgain");
   score = 0;
   updateScore();
   startEle.classList.add("hidden");
@@ -250,7 +237,6 @@ function randomVideo() {
     video.src = `assets/video/${
       srcVideo.vertical[Math.floor(Math.random() * 2)]
     }.mp4`;
-    console.log(Math.floor(Math.random() * 2));
   }
   video.load();
   video.play();
