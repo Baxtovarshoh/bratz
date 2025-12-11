@@ -44,9 +44,8 @@ function shuffle(arr) {
 }
 linkFor.forEach((e) => {
   let link = document.createElement("link");
-  link.as = "image/png";
   link.rel = "preload";
-  link.type = "png";
+  link.as = "image";
   link.href = `assets/image/${e}.png`;
   document.head.appendChild(link);
 });
@@ -63,7 +62,6 @@ let readyToCheck = false;
 
 [...srcVideo.horizontal, ...srcVideo.vertical].forEach((e) => {
   let link = document.createElement("link");
-  link.as = "video";
   link.rel = "preload";
   link.href = `assets/video/${e}.mp4`;
   document.head.appendChild(link);
@@ -103,7 +101,6 @@ function nextCharacter() {
 }
 
 function randomizeBlockScrolls() {
-
   readyToCheck = false;
   blocks.forEach((block) => {
     const items = [...block.querySelectorAll("img")];
@@ -173,7 +170,6 @@ blocks.forEach((block) => {
       const isCorrect = closest.src.includes(current);
 
       solvedParts[part] = isCorrect;
-
 
       if (solvedParts.head && solvedParts.body && solvedParts.foot) {
         score++;
