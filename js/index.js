@@ -60,12 +60,6 @@ let currentVolume = false;
 let solvedParts = { head: false, body: false, foot: false };
 let readyToCheck = false;
 
-[...srcVideo.horizontal, ...srcVideo.vertical].forEach((e) => {
-  let link = document.createElement("link");
-  link.rel = "preload";
-  link.href = `assets/video/${e}.mp4`;
-  document.head.appendChild(link);
-});
 function updateScore() {
   scoreEle.forEach((el) => (el.textContent = score));
 }
@@ -244,5 +238,8 @@ function endedVideo() {
 document.addEventListener("DOMContentLoaded", randomVideo);
 video.addEventListener("ended", endedVideo);
 document.addEventListener("resize", randomVideo);
+video.addEventListener("loadeddata", () => {
+  video.play();
+});
 
 randomVideo();
