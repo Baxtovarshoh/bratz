@@ -11,8 +11,7 @@ const imgEle = document.querySelectorAll(".im");
 const blocks = document.querySelectorAll(".container-block > div");
 const video = document.querySelector("video");
 const volume = document.querySelector(".volume");
-
-const characterOrder = ["cloe", "yasmina", "sasha"];
+const logos = document.querySelector(".logos");
 
 const srcVideo = {
   vertical: ["vertical-v1", "vertical-v2"],
@@ -35,13 +34,6 @@ const linkFor = [
   "sasha-logo",
   "logo",
 ];
-function shuffle(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
 linkFor.forEach((e) => {
   let link = document.createElement("link");
   link.rel = "preload";
@@ -49,16 +41,17 @@ linkFor.forEach((e) => {
   link.href = `assets/image/${e}.png`;
   document.head.appendChild(link);
 });
-let newShuffleArr = shuffle(characterOrder);
-let currentIndex = 0;
-let current = newShuffleArr[currentIndex];
+
 let score = 0;
 let timer = 30;
 let timerInterval;
 let windowHeight = window.innerHeight <= 400;
 let currentVolume = false;
-let solvedParts = { head: false, body: false, foot: false };
 let readyToCheck = false;
+let isShuffling = false;
+let isCooldown = false;
+const holdMs = 1600;
+const shuffleSettlingMs = 300;
 
 function updateScore() {
   scoreEle.forEach((el) => (el.textContent = score));
@@ -77,50 +70,88 @@ function updateVolume() {
   }
 }
 
-function updateLogo() {
+function updateLogo(name) {
   logosContainer.forEach((logo) => {
     logo.classList.remove("active");
-    if (logo.classList.contains(current)) {
+    if (logo.classList.contains(name)) {
       logo.classList.add("active");
+    } else {
+      logos.classList.add("hidden");
     }
   });
 }
 
-function nextCharacter() {
-  currentIndex = (currentIndex + 1) % characterOrder.length;
-  current = characterOrder[currentIndex];
-  solvedParts = { head: false, body: false, foot: false };
-  updateLogo();
-  randomizeBlockScrolls();
-}
-
 function randomizeBlockScrolls() {
+  isShuffling = true;
   readyToCheck = false;
+
   blocks.forEach((block) => {
     const items = [...block.querySelectorAll("img")];
 
-    items.sort(() => Math.random() - 5.3);
+    items.sort(() => Math.random() - 0.5);
+
     block.innerHTML = "";
     items.forEach((img) => block.appendChild(img));
 
     const blockWidth = block.clientWidth;
-    const maxScroll = block.scrollWidth - blockWidth - 150;
-    block.scrollLeft = Math.floor(Math.random() * maxScroll);
+    const maxScroll = block.scrollWidth - blockWidth;
+    block.scrollLeft = Math.random() * maxScroll;
   });
   setTimeout(() => {
+    isShuffling = false;
     readyToCheck = true;
-  }, 500);
+    console.log("true");
+  }, shuffleSettlingMs);
 }
 
-function applyState() {
-  blocks.forEach((block) => {
-    const items = [...block.querySelectorAll("img")];
-    items.sort(() => Math.random() - 0.2);
-    block.innerHTML = "";
-    items.forEach((img) => block.appendChild(img));
-  });
-  updateLogo(current);
-  randomizeBlockScrolls();
+function getCollectedCharacter() {
+  const collectedParts = [];
+
+  for (const block of blocks) {
+    const imgs = [...block.querySelectorAll("img")];
+    if (imgs.length === 0) return null;
+
+    const blockRect = block.getBoundingClientRect();
+    const centerX = blockRect.left + blockRect.width / 2;
+
+    let closest = null;
+    let minDist = Infinity;
+
+    imgs.forEach((img) => {
+      const rect = img.getBoundingClientRect();
+      const imgCenter = rect.left + rect.width / 2;
+      const dist = Math.abs(imgCenter - centerX);
+      if (dist < minDist) {
+        minDist = dist;
+        closest = img;
+      }
+    });
+
+    if (!closest) {
+      console.warn("Не найден closest в блоке", block);
+      return null;
+    }
+    const rect = closest.getBoundingClientRect();
+    const imgCenter = rect.left + rect.width / 2;
+    const offset = imgCenter - centerX + block.scrollLeft;
+
+    block.scrollTo({
+      left: offset,
+      behavior: "smooth",
+    });
+
+    const src = closest.src || "";
+    collectedParts.push(src);
+  }
+
+  if (collectedParts.length === 0) return null;
+
+  const check = (name) => collectedParts.every((s) => s.includes(name));
+  if (check("cloe")) return "cloe";
+  if (check("yasmina")) return "yasmina";
+  if (check("sasha")) return "sasha";
+
+  return null;
 }
 
 blocks.forEach((block) => {
@@ -128,56 +159,31 @@ blocks.forEach((block) => {
 
   block.addEventListener("scroll", () => {
     if (!readyToCheck) return;
+    if (isShuffling) return;
+    if (isCooldown) return;
+
     clearTimeout(timeout);
 
     timeout = setTimeout(() => {
-      const imgs = [...block.querySelectorAll("img")];
-      const blockRect = block.getBoundingClientRect();
-      const centerX = blockRect.left + blockRect.width / 2;
+      const collected = getCollectedCharacter();
 
-      let closest = null;
-      let minDist = Infinity;
-
-      imgs.forEach((img) => {
-        const rect = img.getBoundingClientRect();
-        const imgCenter = rect.left + rect.width / 2;
-        const dist = Math.abs(imgCenter - centerX);
-
-        if (dist < minDist) {
-          minDist = dist;
-          closest = img;
-        }
-      });
-
-      if (!closest) return;
-
-      const rect = closest.getBoundingClientRect();
-      const imgCenter = rect.left + rect.width / 2;
-      const offset = imgCenter - centerX + block.scrollLeft;
-
-      block.scrollTo({
-        left: offset,
-        behavior: "smooth",
-      });
-
-      const part = closest.dataset.el;
-      const isCorrect = closest.src.includes(current);
-
-      solvedParts[part] = isCorrect;
-
-      if (solvedParts.head && solvedParts.body && solvedParts.foot) {
+      if (collected) {
+        isCooldown = true;
+        readyToCheck = false;
         score++;
         updateScore();
-        solvedParts = { head: false, body: false, foot: false };
-        nextCharacter();
-        randomizeBlockScrolls();
+        updateLogo(collected);
+        setTimeout(() => {
+          isCooldown = false;
+          randomizeBlockScrolls();
+        }, holdMs);
+      } else {
+        console.log(Error.name);
       }
       if (score === 3) {
-        setTimeout(() => {
-          finishGame();
-        }, 100);
+        setTimeout(() => finishGame(), 200);
       }
-    }, 500);
+    }, 200);
   });
 });
 
@@ -188,11 +194,11 @@ function finishGame() {
 }
 
 function startGame() {
-  solvedParts = { head: false, body: false, foot: false };
   timeEle.textContent = timer;
+  randomizeBlockScrolls();
+  logos.classList.remove("hidden");
   score = 0;
   updateScore();
-  applyState();
   startEle.classList.add("hidden");
   gameEle.classList.remove("hidden");
   timerInterval = setInterval(() => {
@@ -214,9 +220,17 @@ function playAgain() {
   endEle.classList.add("hidden");
   timer = 30;
   timeEle.textContent = timer;
-  updateLogo(current);
+  logosContainer.forEach((e) => {
+    e.classList.remove("active");
+  });
+  logos.classList.remove("hidden");
   startGame();
 }
+window.addEventListener("load", () => {
+  readyToCheck = false;
+  isShuffling = false;
+  isCooldown = false;
+});
 
 function randomVideo() {
   if (windowHeight) {
@@ -231,6 +245,7 @@ function randomVideo() {
   video.load();
   video.play();
 }
+
 function endedVideo() {
   videoEle.classList.add("hidden");
   startEle.classList.remove("hidden");
@@ -238,8 +253,5 @@ function endedVideo() {
 document.addEventListener("DOMContentLoaded", randomVideo);
 video.addEventListener("ended", endedVideo);
 document.addEventListener("resize", randomVideo);
-video.addEventListener("loadeddata", () => {
-  video.play();
-});
 
 randomVideo();

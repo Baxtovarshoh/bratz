@@ -19,6 +19,9 @@
   .game{
     width: 100%;
   }
+  .container-block{
+    height: 59%;
+  }
 }
 @media (max-height: 400px) {
   .phone {

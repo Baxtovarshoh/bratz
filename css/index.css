@@ -124,7 +124,6 @@ body {
   display: flex;
   flex-direction: column;
   margin-top: 40px;
-
 }
 .logos-container {
   width: 100%;
@@ -242,7 +241,11 @@ a {
   top: 20px;
   left: 20px;
 }
-.ret{
+
+.im {
+  width: 100%;
+}
+.ret {
   width: 100%;
   display: flex;
   flex-direction: column;
